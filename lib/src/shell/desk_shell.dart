@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../utils/platform_utils.dart';
+import '../deskify_root.dart';
 
 /// A destination for the [DeskShell] navigation.
 class DeskDestination {
@@ -61,7 +62,17 @@ class DeskShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deskify = Deskify.of(context);
+    if (deskify != null) {
+      deskify.updateShellState(
+        destinations: destinations,
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
+      );
+    }
+
     final isWide = MediaQuery.of(context).size.width >= breakpoint;
+
 
     if (isWide) {
       return Scaffold(

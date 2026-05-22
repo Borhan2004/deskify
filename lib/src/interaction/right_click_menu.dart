@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../deskify_root.dart';
 
 /// A simple context menu builder for desktop-specific right-click actions.
 class DeskRightClickMenu extends StatelessWidget {
@@ -24,7 +25,14 @@ class DeskRightClickMenu extends StatelessWidget {
   }
 
   void _showMenu(BuildContext context, Offset position) {
+    final deskify = Deskify.of(context);
+    if (deskify != null) {
+      deskify.showContextMenu(context, position, items);
+      return;
+    }
+
     showMenu(
+
       context: context,
       position: RelativeRect.fromLTRB(
         position.dx,

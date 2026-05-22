@@ -383,6 +383,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  tahoea_liquid_glass:
+    dependency: "direct main"
+    description:
+      name: tahoea_liquid_glass
+      sha256: "4c598fe319bb4e7ec0a324fab66063a2883e76200dc1649307207ead64646905"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
   term_glyph:
     dependency: transitive
     description:

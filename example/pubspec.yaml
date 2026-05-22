@@ -13,6 +13,7 @@ dependencies:
   deskify:
     path: ../
   google_fonts: ^6.1.0
+  tahoea_liquid_glass: ^0.0.8
 
 dev_dependencies:
   flutter_test:
