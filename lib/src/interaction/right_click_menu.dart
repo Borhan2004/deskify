@@ -19,7 +19,8 @@ class DeskRightClickMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onSecondaryTapDown: (details) => _showMenu(context, details.globalPosition),
+      onSecondaryTapDown: (details) =>
+          _showMenu(context, details.globalPosition),
       child: child,
     );
   }
@@ -32,7 +33,6 @@ class DeskRightClickMenu extends StatelessWidget {
     }
 
     showMenu(
-
       context: context,
       position: RelativeRect.fromLTRB(
         position.dx,

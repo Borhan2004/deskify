@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../deskify_root.dart';
 
 /// A wrapper to prevent mobile layouts from looking "stretched" on large screens.
-/// 
+///
 /// It applies a maximum width and centers the content automatically.
 class DeskConstraintBox extends StatelessWidget {
   /// The widget below this widget in the tree.
@@ -35,4 +35,3 @@ class DeskConstraintBox extends StatelessWidget {
     );
   }
 }
-

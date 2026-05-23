@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// A widget that adds hover effects to its child.
-/// 
-/// Developers can easily add hover states like opacity changes, scaling, 
+///
+/// Developers can easily add hover states like opacity changes, scaling,
 /// or color tints with a single property.
 class HoverDecorator extends StatefulWidget {
   /// The widget below this widget in the tree.

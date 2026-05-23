@@ -1,7 +1,19 @@
 name: deskify
 description: "A Mobile-to-Desktop Master Suite that solves common UX gaps when moving apps from mobile to macOS, Windows, and Linux."
-version: 0.1.0
-homepage: https://github.com/softvenceomega/deskify
+version: 0.1.1
+homepage: https://github.com/Borhan2004/deskify
+repository: https://github.com/Borhan2004/deskify
+issue_tracker: https://github.com/Borhan2004/deskify/issues
+
+screenshots:
+  - description: 'Deskify Control Center with glassmorphic sidebar'
+    path: doc/screenshots/control_center.png
+  - description: 'Deskify Telemetry Hub with real-time hardware reports'
+    path: doc/screenshots/telemetry_hub.png
+  - description: 'Deskify Wave Laboratory for designing custom glass variations'
+    path: doc/screenshots/wave_laboratory.png
+  - description: 'Deskify Developer coordination suite and simulator'
+    path: doc/screenshots/dev_panel.png
 
 environment:
   sdk: ^3.11.5

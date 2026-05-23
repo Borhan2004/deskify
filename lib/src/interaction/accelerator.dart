@@ -66,15 +66,11 @@ class _DeskAcceleratorState extends State<DeskAccelerator> {
             onInvoke: (intent) => intent.callback(),
           ),
         },
-        child: Focus(
-          autofocus: true,
-          child: widget.child,
-        ),
+        child: Focus(autofocus: true, child: widget.child),
       ),
     );
   }
 }
-
 
 /// An intent that carries a [VoidCallback].
 class VoidCallbackIntent extends Intent {

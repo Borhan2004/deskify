@@ -7,8 +7,6 @@ import 'interaction/right_click_menu.dart';
 import 'interaction/hover_decorator.dart';
 import 'shell/desk_shell.dart';
 
-
-
 /// Predefined device configurations for Deskify's simulator mode.
 class DeskifyDeviceConfig {
   final String name;
@@ -54,11 +52,7 @@ class DeskifyDeviceConfig {
 class DeskifyProvider extends InheritedWidget {
   final DeskifyState state;
 
-  const DeskifyProvider({
-    super.key,
-    required this.state,
-    required super.child,
-  });
+  const DeskifyProvider({super.key, required this.state, required super.child});
 
   @override
   bool updateShouldNotify(DeskifyProvider oldWidget) => true;
@@ -170,15 +164,17 @@ class DeskifyState extends State<_DeskifyCoordinator> {
 
     // Register toggle key for Developer Hub: Cmd/Ctrl + Shift + D
     _dynamicShortcuts[LogicalKeySet(
-      LogicalKeyboardKey.meta,
-      LogicalKeyboardKey.shift,
-      LogicalKeyboardKey.keyD,
-    )] = toggleDevHub;
+          LogicalKeyboardKey.meta,
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.keyD,
+        )] =
+        toggleDevHub;
     _dynamicShortcuts[LogicalKeySet(
-      LogicalKeyboardKey.control,
-      LogicalKeyboardKey.shift,
-      LogicalKeyboardKey.keyD,
-    )] = toggleDevHub;
+          LogicalKeyboardKey.control,
+          LogicalKeyboardKey.shift,
+          LogicalKeyboardKey.keyD,
+        )] =
+        toggleDevHub;
     _updateMergedShortcuts();
   }
 
@@ -214,12 +210,17 @@ class DeskifyState extends State<_DeskifyCoordinator> {
   }
 
   /// Get currently registered shortcuts for dashboard presentation.
-  Map<ShortcutActivator, VoidCallback> get registeredShortcuts => _mergedShortcuts;
+  Map<ShortcutActivator, VoidCallback> get registeredShortcuts =>
+      _mergedShortcuts;
 
   // --- Dynamic Context Menu API ---
 
   /// Triggers a custom, glassmorphic context menu at the specified [position].
-  void showContextMenu(BuildContext context, Offset position, List<DeskContextMenuItem> items) {
+  void showContextMenu(
+    BuildContext context,
+    Offset position,
+    List<DeskContextMenuItem> items,
+  ) {
     setState(() {
       _contextMenuPosition = position;
       _contextMenuItems = items;
@@ -239,7 +240,8 @@ class DeskifyState extends State<_DeskifyCoordinator> {
   // --- Platform Override & Sizing API ---
 
   /// Gets the currently active target platform, respecting developer overrides.
-  TargetPlatform get activePlatform => _platformOverride ?? defaultTargetPlatform;
+  TargetPlatform get activePlatform =>
+      _platformOverride ?? defaultTargetPlatform;
 
   /// Sets the runtime target platform override.
   void setPlatformOverride(TargetPlatform? platform) {
@@ -338,12 +340,15 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                 clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(child: appWidget),
-                  if (_isContextMenuVisible && _contextMenuItems != null && _contextMenuPosition != null)
+                  if (_isContextMenuVisible &&
+                      _contextMenuItems != null &&
+                      _contextMenuPosition != null)
                     _buildPremiumContextMenuOverlay(),
                   // Keep Developer Hub Drawer in the stack so it animates nicely
-                  if (widget.enableDevHub)
-                    _buildDeveloperHubDrawer(),
-                  if (widget.enableDevHub && widget.showDevHubButton && !_isDevHubOpen)
+                  if (widget.enableDevHub) _buildDeveloperHubDrawer(),
+                  if (widget.enableDevHub &&
+                      widget.showDevHubButton &&
+                      !_isDevHubOpen)
                     _buildFloatingDevButton(),
                 ],
               ),
@@ -392,7 +397,11 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                   ),
                   const Expanded(child: SizedBox()),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 16),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Color(0xFF94A3B8),
+                      size: 16,
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () {
@@ -494,16 +503,23 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                                 hideContextMenu();
                                 item.onTap();
                               },
-                              hoverColor: Theme.of(context).colorScheme.primary.withValues(alpha: .1),
+                              hoverColor: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: .1),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
                                 child: Row(
                                   children: [
                                     if (item.icon != null) ...[
                                       Icon(
                                         item.icon,
                                         size: 16,
-                                        color: Theme.of(context).brightness == Brightness.light
+                                        color:
+                                            Theme.of(context).brightness ==
+                                                Brightness.light
                                             ? Colors.grey[700]
                                             : Colors.grey[300],
                                       ),
@@ -515,7 +531,9 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
-                                          color: Theme.of(context).brightness == Brightness.light
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.light
                                               ? Colors.black87
                                               : Colors.white,
                                           decoration: TextDecoration.none,
@@ -605,7 +623,9 @@ class DeskifyState extends State<_DeskifyCoordinator> {
       width: 360,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A).withValues(alpha: .85), // Premium glassmorphic background
+          color: const Color(
+            0xFF0F172A,
+          ).withValues(alpha: .85), // Premium glassmorphic background
           border: const Border(
             left: BorderSide(color: Color(0xFF334155), width: 1.5),
           ),
@@ -642,13 +662,19 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF6366F1).withValues(alpha: .3),
+                            color: const Color(
+                              0xFF6366F1,
+                            ).withValues(alpha: .3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
-                      child: const Icon(Icons.bolt, color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.bolt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     const Expanded(
@@ -686,7 +712,10 @@ class DeskifyState extends State<_DeskifyCoordinator> {
               // Body
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
                   children: [
                     // Section 1: Platform Simulation
                     _buildSectionHeader('SIMULATED PLATFORM OVERRIDE'),
@@ -737,9 +766,21 @@ class DeskifyState extends State<_DeskifyCoordinator> {
     final current = activePlatform;
     final List<Map<String, dynamic>> options = [
       {'name': 'macOS', 'platform': TargetPlatform.macOS, 'icon': Icons.apple},
-      {'name': 'Windows', 'platform': TargetPlatform.windows, 'icon': Icons.window},
-      {'name': 'Mobile', 'platform': TargetPlatform.iOS, 'icon': Icons.phone_iphone},
-      {'name': 'Linux', 'platform': TargetPlatform.linux, 'icon': Icons.terminal},
+      {
+        'name': 'Windows',
+        'platform': TargetPlatform.windows,
+        'icon': Icons.window,
+      },
+      {
+        'name': 'Mobile',
+        'platform': TargetPlatform.iOS,
+        'icon': Icons.phone_iphone,
+      },
+      {
+        'name': 'Linux',
+        'platform': TargetPlatform.linux,
+        'icon': Icons.terminal,
+      },
     ];
 
     return GridView.count(
@@ -750,9 +791,11 @@ class DeskifyState extends State<_DeskifyCoordinator> {
       mainAxisSpacing: 10,
       childAspectRatio: 2.2,
       children: options.map((opt) {
-        final isSelected = current == opt['platform'] ||
+        final isSelected =
+            current == opt['platform'] ||
             (opt['platform'] == TargetPlatform.iOS &&
-                (current == TargetPlatform.iOS || current == TargetPlatform.android));
+                (current == TargetPlatform.iOS ||
+                    current == TargetPlatform.android));
         return HoverDecorator(
           onHoverScale: 1.03,
           child: GestureDetector(
@@ -765,23 +808,25 @@ class DeskifyState extends State<_DeskifyCoordinator> {
             },
             child: Container(
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? const Color(0xFF4F46E5).withValues(alpha: .9) 
+                color: isSelected
+                    ? const Color(0xFF4F46E5).withValues(alpha: .9)
                     : const Color(0xFF1E293B).withValues(alpha: .6),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected 
-                      ? const Color(0xFF818CF8) 
+                  color: isSelected
+                      ? const Color(0xFF818CF8)
                       : const Color(0xFF334155).withValues(alpha: .5),
                   width: 1.5,
                 ),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: const Color(0xFF4F46E5).withValues(alpha: .3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  )
-                ] : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF4F46E5).withValues(alpha: .3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -795,7 +840,9 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                   Text(
                     opt['name'] as String,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFFE2E8F0),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFFE2E8F0),
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.none,
@@ -821,31 +868,40 @@ class DeskifyState extends State<_DeskifyCoordinator> {
             child: GestureDetector(
               onTap: () => setDevicePreset(device),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                      ? const Color(0xFF4F46E5).withValues(alpha: .9) 
+                  color: isSelected
+                      ? const Color(0xFF4F46E5).withValues(alpha: .9)
                       : const Color(0xFF1E293B).withValues(alpha: .6),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected 
-                        ? const Color(0xFF818CF8) 
+                    color: isSelected
+                        ? const Color(0xFF818CF8)
                         : const Color(0xFF334155).withValues(alpha: .5),
                     width: 1.5,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: const Color(0xFF4F46E5).withValues(alpha: .2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    )
-                  ] : [],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF4F46E5,
+                            ).withValues(alpha: .2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Row(
                   children: [
                     Icon(
                       device.icon,
-                      color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF94A3B8),
                       size: 18,
                     ),
                     const SizedBox(width: 12),
@@ -853,7 +909,9 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                       child: Text(
                         device.name,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : const Color(0xFFE2E8F0),
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFFE2E8F0),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.none,
@@ -865,7 +923,9 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                           ? 'Fluid'
                           : '${device.size!.width.toInt()} x ${device.size!.height.toInt()}',
                       style: TextStyle(
-                        color: isSelected ? Colors.white.withValues(alpha: .7) : const Color(0xFF64748B),
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: .7)
+                            : const Color(0xFF64748B),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.none,
@@ -937,7 +997,10 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(6),
@@ -993,9 +1056,15 @@ class DeskifyState extends State<_DeskifyCoordinator> {
           const Divider(color: Color(0xFF334155)),
           _buildStatRow('Screen Height', '${media.size.height.toInt()} px'),
           const Divider(color: Color(0xFF334155)),
-          _buildStatRow('Device Pixel Ratio', media.devicePixelRatio.toStringAsFixed(2)),
+          _buildStatRow(
+            'Device Pixel Ratio',
+            media.devicePixelRatio.toStringAsFixed(2),
+          ),
           const Divider(color: Color(0xFF334155)),
-          _buildStatRow('Adaptive Layout', DeskPlatform.isDesktop ? 'Desktop Side Rail' : 'Mobile Bottom Bar'),
+          _buildStatRow(
+            'Adaptive Layout',
+            DeskPlatform.isDesktop ? 'Desktop Side Rail' : 'Mobile Bottom Bar',
+          ),
         ],
       ),
     );
@@ -1034,7 +1103,10 @@ class DeskifyState extends State<_DeskifyCoordinator> {
 /// before the first layout pass has completed (e.g. during asynchronous font loading).
 class SafeReadingOrderTraversalPolicy extends ReadingOrderTraversalPolicy {
   @override
-  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
+  Iterable<FocusNode> sortDescendants(
+    Iterable<FocusNode> descendants,
+    FocusNode currentNode,
+  ) {
     for (final node in descendants) {
       final context = node.context;
       if (context != null) {

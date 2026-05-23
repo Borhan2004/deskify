@@ -73,7 +73,6 @@ class DeskShell extends StatelessWidget {
 
     final isWide = MediaQuery.of(context).size.width >= breakpoint;
 
-
     if (isWide) {
       return Scaffold(
         body: Row(

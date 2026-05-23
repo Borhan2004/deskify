@@ -1,3 +1,8 @@
+## 0.1.1
+
+- Updated README screenshot URLs to use absolute public raw GitHub addresses for improved public rendering.
+- Bumped version to 0.1.1.
+
 ## 0.1.0
 
 - Initial release of Deskify core foundation.

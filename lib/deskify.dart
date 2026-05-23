@@ -7,4 +7,3 @@ export 'src/interaction/accelerator.dart';
 export 'src/interaction/right_click_menu.dart';
 export 'src/layout/constraint_box.dart';
 export 'src/utils/platform_utils.dart';
-

@@ -45,4 +45,3 @@ class DeskPlatform {
   /// Returns `true` if the app is running on the web.
   static bool get isWeb => kIsWeb && overridePlatform == null;
 }
-
