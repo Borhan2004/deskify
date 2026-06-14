@@ -55,10 +55,30 @@ class DeskifyExampleApp extends StatelessWidget {
           icon: Icons.info_outline,
           onTap: () {},
         ),
-        DeskContextMenuItem(
-          label: 'Wave Recalibration',
+        DeskContextMenuItem.divider(),
+        DeskContextMenuItem.submenu(
+          label: 'Calibrate Workspace',
           icon: Icons.waves_rounded,
-          onTap: () {},
+          items: [
+            DeskContextMenuItem(
+              label: 'Fast Calibration',
+              icon: Icons.flash_on_rounded,
+              onTap: () {},
+            ),
+            DeskContextMenuItem(
+              label: 'Deep Diagnostics',
+              icon: Icons.analytics_rounded,
+              onTap: () {},
+            ),
+          ],
+        ),
+        DeskContextMenuItem.divider(),
+        DeskContextMenuItem.checkbox(
+          label: 'Enable Hardware Shaders',
+          isChecked: true,
+          onChanged: (val) {
+            debugPrint('Shaders toggled: $val');
+          },
         ),
       ],
       child: MaterialApp(
@@ -180,6 +200,13 @@ class _MainScreenState extends State<MainScreen> {
       child: NeonSpaceCanvas(
         activeTheme: _activeWallpaper,
         child: DeskShell(
+          titleBar: DeskTitleBar(
+            title: const Text('Deskify Simulation Dashboard'),
+            onClose: () => debugPrint('Simulated window close'),
+            onMinimize: () => debugPrint('Simulated window minimize'),
+            onMaximize: () => debugPrint('Simulated window maximize'),
+          ),
+          collapsedTitle: const Icon(Icons.apple_rounded, color: Color(0xFF0A84FF), size: 24),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -1,3 +1,12 @@
+## 0.2.0
+
+- Added collapsible side navigation rail (Sidebar) with width-changing animations.
+- Introduced `DeskTitleBar` simulating native-feeling window control buttons (macOS traffic lights / Windows control buttons) with glassmorphism.
+- Enhanced context menus (`DeskContextMenu`) to support cascading nested submenus, checkbox items, and boundary safety adjustments.
+- Added `DeskShortcut` helper for adaptive OS keyboard shortcut mappings (Cmd on macOS, Ctrl on Windows/Linux).
+- Enhanced `HoverDecorator` with offsets, Z-rotations, custom hover cursors, custom shadow overrides, and hover state listeners.
+- Expanded Developer Hub drawer diagnostics panel to include simulated theme toggling and simulated UI latency sliders.
+
 ## 0.1.1
 
 - Updated README screenshot URLs to use absolute public raw GitHub addresses for improved public rendering.

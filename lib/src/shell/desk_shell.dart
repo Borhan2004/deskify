@@ -25,8 +25,8 @@ class DeskDestination {
 /// The main adaptive wrapper for deskify apps.
 ///
 /// It automatically switches between a [NavigationBar] on mobile/narrow screens
-/// and a [NavigationRail] (sidebar) on desktop/wide screens.
-class DeskShell extends StatelessWidget {
+/// and an animated [NavigationRail] (sidebar) on desktop/wide screens.
+class DeskShell extends StatefulWidget {
   /// The widget to display as the main content.
   final Widget child;
 
@@ -42,11 +42,20 @@ class DeskShell extends StatelessWidget {
   /// The breakpoint for switching between sidebar and bottom bar.
   final double breakpoint;
 
-  /// The title of the app, shown in the sidebar header.
+  /// The title of the app, shown in the sidebar header when expanded.
   final Widget? title;
+
+  /// The title shown in the sidebar header when collapsed (icon/logo).
+  final Widget? collapsedTitle;
 
   /// The trailing widget for the sidebar.
   final Widget? trailing;
+
+  /// An optional platform-adaptive title bar (such as [DeskTitleBar]).
+  final PreferredSizeWidget? titleBar;
+
+  /// Whether the sidebar navigation rail can be collapsed.
+  final bool collapsible;
 
   /// Creates a [DeskShell].
   const DeskShell({
@@ -57,40 +66,74 @@ class DeskShell extends StatelessWidget {
     this.onDestinationSelected,
     this.breakpoint = 600,
     this.title,
+    this.collapsedTitle,
     this.trailing,
+    this.titleBar,
+    this.collapsible = true,
   });
+
+  @override
+  State<DeskShell> createState() => _DeskShellState();
+}
+
+class _DeskShellState extends State<DeskShell> {
+  bool _isCollapsed = false;
 
   @override
   Widget build(BuildContext context) {
     final deskify = Deskify.of(context);
     if (deskify != null) {
       deskify.updateShellState(
-        destinations: destinations,
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
+        destinations: widget.destinations,
+        selectedIndex: widget.selectedIndex,
+        onDestinationSelected: widget.onDestinationSelected,
       );
     }
 
-    final isWide = MediaQuery.of(context).size.width >= breakpoint;
+    final isWide = MediaQuery.of(context).size.width >= widget.breakpoint;
 
     if (isWide) {
       return Scaffold(
+        appBar: widget.titleBar,
         body: Row(
           children: [
             _buildSidebar(context),
             const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: child),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.015, 0.0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<int>(widget.selectedIndex),
+                  child: widget.child,
+                ),
+              ),
+            ),
           ],
         ),
       );
     }
 
     return Scaffold(
-      body: child,
+      appBar: widget.titleBar,
+      body: widget.child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
-        destinations: destinations.map((d) {
+        selectedIndex: widget.selectedIndex,
+        onDestinationSelected: widget.onDestinationSelected,
+        destinations: widget.destinations.map((d) {
           return NavigationDestination(
             icon: Icon(d.icon),
             selectedIcon: d.selectedIcon != null ? Icon(d.selectedIcon) : null,
@@ -102,25 +145,26 @@ class DeskShell extends StatelessWidget {
   }
 
   Widget _buildSidebar(BuildContext context) {
-    // Platform-specific styling logic
     final bool isMac = DeskPlatform.isMacOS;
     final bool isWin = DeskPlatform.isWindows;
 
     Color? backgroundColor;
     if (isMac) {
-      // macOS style: slightly translucent or greyish
       backgroundColor = Theme.of(context).brightness == Brightness.light
           ? Colors.grey[100]?.withValues(alpha: .9)
           : Colors.grey[900]?.withValues(alpha: .9);
     } else if (isWin) {
-      // Windows style: Solid acrylic-like
       backgroundColor = Theme.of(
         context,
       ).colorScheme.surfaceContainerHighest.withValues(alpha: .5);
     }
 
-    return Container(
-      width: 280,
+    final double sidebarWidth = _isCollapsed ? 80.0 : 280.0;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      width: sidebarWidth,
       decoration: BoxDecoration(
         color: backgroundColor,
         border: Border(
@@ -133,51 +177,80 @@ class DeskShell extends StatelessWidget {
       child: ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: NavigationRail(
-            extended: true,
-            backgroundColor: Colors.transparent,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onDestinationSelected,
-            minExtendedWidth: 280,
-            labelType: NavigationRailLabelType.none,
-            leading: title != null
-                ? Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 32,
-                      horizontal: 24,
-                    ),
-                    child: title,
-                  )
-                : null,
-            trailing: trailing != null
-                ? Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: 24,
-                          left: 16,
-                          right: 16,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return NavigationRail(
+                extended: !_isCollapsed,
+                backgroundColor: Colors.transparent,
+                selectedIndex: widget.selectedIndex,
+                onDestinationSelected: widget.onDestinationSelected,
+                minExtendedWidth: 280,
+                labelType: NavigationRailLabelType.none,
+                leading: widget.title != null || widget.collapsedTitle != null
+                    ? Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 8,
                         ),
-                        child: trailing,
+                        child: _isCollapsed
+                            ? (widget.collapsedTitle ?? const Icon(Icons.apps_rounded, size: 24))
+                            : widget.title,
+                      )
+                    : null,
+                trailing: Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 24,
+                        left: 8,
+                        right: 8,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.trailing != null) ...[
+                            _isCollapsed
+                                ? const SizedBox.shrink() // hide custom trailing on collapse
+                                : widget.trailing!,
+                            const SizedBox(height: 16),
+                          ],
+                          if (widget.collapsible)
+                            IconButton(
+                              icon: Icon(
+                                _isCollapsed
+                                    ? Icons.chevron_right_rounded
+                                    : Icons.chevron_left_rounded,
+                              ),
+                              tooltip: _isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
+                              onPressed: () {
+                                setState(() {
+                                  _isCollapsed = !_isCollapsed;
+                                });
+                              },
+                            ),
+                        ],
                       ),
                     ),
-                  )
-                : null,
-            destinations: destinations.map((d) {
-              return NavigationRailDestination(
-                icon: Icon(d.icon, size: 22),
-                selectedIcon: Icon(d.selectedIcon ?? d.icon, size: 22),
-                label: Text(
-                  d.label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
                   ),
                 ),
+                destinations: widget.destinations.map((d) {
+                  return NavigationRailDestination(
+                    icon: Icon(d.icon, size: 22),
+                    selectedIcon: Icon(d.selectedIcon ?? d.icon, size: 22),
+                    label: Text(
+                      d.label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
         ),
       ),

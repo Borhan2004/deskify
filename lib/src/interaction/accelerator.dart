@@ -1,5 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../deskify_root.dart';
+import '../utils/platform_utils.dart';
+
+/// A utility to define adaptive platform-specific keyboard shortcuts.
+class DeskShortcut {
+  /// Creates a keyboard shortcut that uses the Command (⌘) key on macOS
+  /// and the Control (Ctrl) key on Windows, Linux, Android, and Web.
+  static ShortcutActivator controlOrCommand(LogicalKeyboardKey key) {
+    if (DeskPlatform.isMacOS) {
+      return SingleActivator(key, meta: true);
+    }
+    return SingleActivator(key, control: true);
+  }
+
+  /// Creates a keyboard shortcut that uses Command + Shift (⌘+⇧) on macOS
+  /// and Control + Shift (Ctrl+Shift) on Windows, Linux, Android, and Web.
+  static ShortcutActivator controlOrCommandShift(LogicalKeyboardKey key) {
+    if (DeskPlatform.isMacOS) {
+      return SingleActivator(key, meta: true, shift: true);
+    }
+    return SingleActivator(key, control: true, shift: true);
+  }
+
+  /// Creates a keyboard shortcut that uses the Alt/Option key.
+  static ShortcutActivator alt(LogicalKeyboardKey key) {
+    return SingleActivator(key, alt: true);
+  }
+}
 
 /// A clean way to define global keyboard shortcuts that works across all OSs.
 class DeskAccelerator extends StatefulWidget {

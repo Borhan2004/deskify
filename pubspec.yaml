@@ -1,6 +1,6 @@
 name: deskify
 description: "A Mobile-to-Desktop Master Suite that solves common UX gaps when moving apps from mobile to macOS, Windows, and Linux."
-version: 0.1.1
+version: 0.2.0
 homepage: https://github.com/Borhan2004/deskify
 repository: https://github.com/Borhan2004/deskify
 issue_tracker: https://github.com/Borhan2004/deskify/issues

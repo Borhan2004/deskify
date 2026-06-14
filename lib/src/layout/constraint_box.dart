@@ -3,7 +3,7 @@ import '../deskify_root.dart';
 
 /// A wrapper to prevent mobile layouts from looking "stretched" on large screens.
 ///
-/// It applies a maximum width and centers the content automatically.
+/// It applies a maximum width and layout alignment, animating transitions smoothly.
 class DeskConstraintBox extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget child;
@@ -11,15 +11,23 @@ class DeskConstraintBox extends StatelessWidget {
   /// The maximum width allowed for the content.
   final double maxWidth;
 
-  /// Whether to center the content when it's smaller than the screen width.
-  final bool centered;
+  /// How to align the child content within the available space.
+  final AlignmentGeometry alignment;
+
+  /// The duration of the constraint transition animation.
+  final Duration duration;
+
+  /// The curve of the constraint transition animation.
+  final Curve curve;
 
   /// Creates a [DeskConstraintBox].
   const DeskConstraintBox({
     super.key,
     required this.child,
     this.maxWidth = 1200,
-    this.centered = true,
+    this.alignment = Alignment.center,
+    this.duration = const Duration(milliseconds: 250),
+    this.curve = Curves.easeInOut,
   });
 
   @override
@@ -27,8 +35,11 @@ class DeskConstraintBox extends StatelessWidget {
     final deskify = Deskify.of(context);
     final maxW = deskify?.widget.defaultMaxWidth ?? maxWidth;
 
-    return Center(
-      child: ConstrainedBox(
+    return Align(
+      alignment: alignment,
+      child: AnimatedContainer(
+        duration: duration,
+        curve: curve,
         constraints: BoxConstraints(maxWidth: maxW),
         child: child,
       ),

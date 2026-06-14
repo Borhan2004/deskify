@@ -146,6 +146,10 @@ class DeskifyState extends State<_DeskifyCoordinator> {
   TargetPlatform? _platformOverride;
   DeskifyDeviceConfig _currentDevice = DeskifyDeviceConfig.presets.first;
 
+  // Simulated metrics
+  ThemeMode _simulatedThemeMode = ThemeMode.dark;
+  double _simulatedLagMs = 0.0;
+
   // Adaptive shell settings
   int _shellSelectedIndex = 0;
   List<DeskDestination> _shellDestinations = [];
@@ -181,6 +185,28 @@ class DeskifyState extends State<_DeskifyCoordinator> {
   /// Rebuilds shortcut mappings.
   void _updateMergedShortcuts() {
     _mergedShortcuts = Map.from(_dynamicShortcuts);
+  }
+
+  // --- Simulated Diagnostic Settings API ---
+
+  /// The simulated theme mode (light/dark) toggled from the Dev Hub.
+  ThemeMode get simulatedThemeMode => _simulatedThemeMode;
+
+  /// The simulated performance latency added during interactive events.
+  double get simulatedLagMs => _simulatedLagMs;
+
+  /// Set the simulated theme mode.
+  void setSimulatedThemeMode(ThemeMode mode) {
+    setState(() {
+      _simulatedThemeMode = mode;
+    });
+  }
+
+  /// Set the simulated lag in milliseconds.
+  void setSimulatedLagMs(double ms) {
+    setState(() {
+      _simulatedLagMs = ms;
+    });
   }
 
   // --- Dynamic Keyboard Shortcuts API ---
@@ -448,111 +474,11 @@ class DeskifyState extends State<_DeskifyCoordinator> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: hideContextMenu,
-        child: Stack(
-          children: [
-            Positioned(
-              left: pos.dx,
-              top: pos.dy,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOutQuad,
-                builder: (context, val, child) {
-                  return Opacity(
-                    opacity: val,
-                    child: Transform.scale(
-                      scale: 0.95 + (0.05 * val),
-                      alignment: Alignment.topLeft,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 200,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.light
-                        ? Colors.white.withValues(alpha: .85)
-                        : const Color(0xFF1E293B).withValues(alpha: .85),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.grey.withValues(alpha: .2)
-                          : Colors.white.withValues(alpha: .1),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .15),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: items.map((item) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                hideContextMenu();
-                                item.onTap();
-                              },
-                              hoverColor: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: .1),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    if (item.icon != null) ...[
-                                      Icon(
-                                        item.icon,
-                                        size: 16,
-                                        color:
-                                            Theme.of(context).brightness ==
-                                                Brightness.light
-                                            ? Colors.grey[700]
-                                            : Colors.grey[300],
-                                      ),
-                                      const SizedBox(width: 12),
-                                    ],
-                                    Expanded(
-                                      child: Text(
-                                        item.label,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color:
-                                              Theme.of(context).brightness ==
-                                                  Brightness.light
-                                              ? Colors.black87
-                                              : Colors.white,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: DeskContextMenuOverlayContent(
+          position: pos,
+          items: items,
+          onDismiss: hideContextMenu,
+          simulatedLagMs: _simulatedLagMs,
         ),
       ),
     );
@@ -729,13 +655,19 @@ class DeskifyState extends State<_DeskifyCoordinator> {
                     _buildDeviceSimulatorList(),
                     const SizedBox(height: 24),
 
-                    // Section 3: Keyboard Shortcuts
+                    // Section 3: Simulated Latency & Theme Controls
+                    _buildSectionHeader('DIAGNOSTIC SIMULATIONS'),
+                    const SizedBox(height: 12),
+                    _buildDiagnosticSimulators(),
+                    const SizedBox(height: 24),
+
+                    // Section 4: Keyboard Shortcuts
                     _buildSectionHeader('ACTIVE KEYBOARD ACCELERATORS'),
                     const SizedBox(height: 12),
                     _buildShortcutList(),
                     const SizedBox(height: 24),
 
-                    // Section 4: Live Viewport Stats
+                    // Section 5: Live Viewport Stats
                     _buildSectionHeader('LIVE SYSTEM DIAGNOSTICS'),
                     const SizedBox(height: 12),
                     _buildSystemStatsCard(media),
@@ -941,6 +873,115 @@ class DeskifyState extends State<_DeskifyCoordinator> {
     );
   }
 
+  Widget _buildDiagnosticSimulators() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B).withValues(alpha: .6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF334155).withValues(alpha: .5),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Simulated Theme',
+                style: TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontSize: 12,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _simulatedThemeMode == ThemeMode.dark ? 'Dark Mode' : 'Light Mode',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(
+                      _simulatedThemeMode == ThemeMode.dark
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                      color: const Color(0xFF818CF8),
+                      size: 18,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      setSimulatedThemeMode(
+                        _simulatedThemeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Divider(color: Color(0xFF334155), height: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Simulated Network/UI Lag',
+                    style: TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 12,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                  Text(
+                    '${_simulatedLagMs.toInt()} ms',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 3,
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                ),
+                child: Slider(
+                  value: _simulatedLagMs,
+                  min: 0.0,
+                  max: 1000.0,
+                  divisions: 20,
+                  activeColor: const Color(0xFF6366F1),
+                  inactiveColor: const Color(0xFF334155),
+                  onChanged: (val) {
+                    setSimulatedLagMs(val);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildShortcutList() {
     if (_mergedShortcuts.isEmpty) {
       return Container(
@@ -977,7 +1018,6 @@ class DeskifyState extends State<_DeskifyCoordinator> {
         shrinkWrap: true,
         padding: EdgeInsets.zero,
         children: _mergedShortcuts.entries.map((entry) {
-          final activatorStr = entry.key.toString();
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: const BoxDecoration(
@@ -987,7 +1027,7 @@ class DeskifyState extends State<_DeskifyCoordinator> {
               children: [
                 Expanded(
                   child: Text(
-                    _formatShortcutText(activatorStr),
+                    _formatShortcutText(entry.key),
                     style: const TextStyle(
                       color: Color(0xFFE2E8F0),
                       fontSize: 12,
@@ -1023,19 +1063,38 @@ class DeskifyState extends State<_DeskifyCoordinator> {
     );
   }
 
-  String _formatShortcutText(String raw) {
-    // Make ShortcutActivator string beautiful and developer friendly
-    return raw
+  String _formatShortcutText(ShortcutActivator activator) {
+    if (activator is SingleActivator) {
+      final List<String> modifiers = [];
+      if (activator.control) modifiers.add('Ctrl');
+      if (activator.meta) modifiers.add('Cmd ⌘');
+      if (activator.shift) modifiers.add('Shift ⇧');
+      if (activator.alt) modifiers.add('Alt ⌥');
+      modifiers.add(activator.trigger.keyLabel.toUpperCase());
+      return modifiers.join(' + ');
+    } else if (activator is LogicalKeySet) {
+      final keysStr = activator.keys.map((k) {
+        final label = k.keyLabel;
+        if (label == 'Control Left' || label == 'Control Right') return 'Ctrl';
+        if (label == 'Meta Left' || label == 'Meta Right') return 'Cmd ⌘';
+        if (label == 'Shift Left' || label == 'Shift Right') return 'Shift ⇧';
+        if (label == 'Alt Left' || label == 'Alt Right') return 'Alt ⌥';
+        return label.toUpperCase();
+      }).join(' + ');
+      return keysStr;
+    }
+
+    return activator.toString()
         .replaceAll('LogicalKeySet#', '')
         .replaceAll('LogicalKeyboardKey#', '')
+        .replaceAll('SingleActivator#', '')
         .replaceAll('(', '')
         .replaceAll(')', '')
-        .replaceAll(' + ', ' + ')
-        .replaceAll('Key N', 'N')
-        .replaceAll('Key D', 'D')
+        .replaceAll('Key ', '')
         .replaceAll('Control Left', 'Ctrl')
         .replaceAll('Meta Left', 'Cmd ⌘')
         .replaceAll('Shift Left', 'Shift ⇧')
+        .replaceAll('Alt Left', 'Alt ⌥')
         .toUpperCase();
   }
 
@@ -1094,6 +1153,262 @@ class DeskifyState extends State<_DeskifyCoordinator> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A stateful menu overlay that supports submenus, checkboxes, dividers, disabled items,
+/// and includes viewport boundary collision safety calculations.
+class DeskContextMenuOverlayContent extends StatefulWidget {
+  final Offset position;
+  final List<DeskContextMenuItem> items;
+  final VoidCallback onDismiss;
+  final double simulatedLagMs;
+
+  const DeskContextMenuOverlayContent({
+    super.key,
+    required this.position,
+    required this.items,
+    required this.onDismiss,
+    required this.simulatedLagMs,
+  });
+
+  @override
+  State<DeskContextMenuOverlayContent> createState() => _DeskContextMenuOverlayContentState();
+}
+
+class _DeskContextMenuOverlayContentState extends State<DeskContextMenuOverlayContent> {
+  DeskContextMenuItem? _hoveredSubmenuItem;
+  Offset? _submenuPosition;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    const double menuWidth = 220.0;
+
+    // Calculate height of the menu
+    double menuHeight = 12.0; // padding
+    for (final item in widget.items) {
+      if (item.type == DeskContextMenuType.divider) {
+        menuHeight += 8.0;
+      } else {
+        menuHeight += 38.0;
+      }
+    }
+
+    double left = widget.position.dx;
+    double top = widget.position.dy;
+    bool alignLeft = false;
+
+    // Boundary check for bottom & right edges
+    if (left + menuWidth > screenSize.width) {
+      left = left - menuWidth;
+      alignLeft = true;
+      if (left < 8) left = 8;
+    }
+    if (top + menuHeight > screenSize.height) {
+      top = screenSize.height - menuHeight - 16;
+      if (top < 8) top = 8;
+    }
+
+    return Stack(
+      children: [
+        // Main Context Menu Panel
+        Positioned(
+          left: left,
+          top: top,
+          child: _buildMenuPanel(
+            items: widget.items,
+            width: menuWidth,
+            onHoverItem: (item, itemIndex, itemRect) {
+              if (item.type == DeskContextMenuType.submenu && item.enabled) {
+                setState(() {
+                  _hoveredSubmenuItem = item;
+                  double subX = alignLeft ? left - menuWidth + 4 : left + menuWidth - 4;
+                  double subY = top + (itemIndex * 38.0) + 6.0;
+                  _submenuPosition = Offset(subX, subY);
+                });
+              } else {
+                setState(() {
+                  _hoveredSubmenuItem = null;
+                  _submenuPosition = null;
+                });
+              }
+            },
+          ),
+        ),
+
+        // Cascading Submenu Panel
+        if (_hoveredSubmenuItem != null && _submenuPosition != null)
+          _buildSubmenuPanel(screenSize, alignLeft),
+      ],
+    );
+  }
+
+  Widget _buildSubmenuPanel(Size screenSize, bool alignLeft) {
+    final submenuItems = _hoveredSubmenuItem!.submenuItems ?? [];
+    const double menuWidth = 220.0;
+
+    double subHeight = 12.0;
+    for (final item in submenuItems) {
+      if (item.type == DeskContextMenuType.divider) {
+        subHeight += 8.0;
+      } else {
+        subHeight += 38.0;
+      }
+    }
+
+    double subX = _submenuPosition!.dx;
+    double subY = _submenuPosition!.dy;
+
+    // Boundary safety for submenu bottom edge
+    if (subY + subHeight > screenSize.height) {
+      subY = screenSize.height - subHeight - 16;
+      if (subY < 8) subY = 8;
+    }
+    // Boundary safety for submenu horizontal edge
+    if (alignLeft) {
+      if (subX < 8) subX = 8;
+    } else {
+      if (subX + menuWidth > screenSize.width) {
+        subX = _submenuPosition!.dx - (menuWidth * 2) + 8;
+        if (subX < 8) subX = 8;
+      }
+    }
+
+    return Positioned(
+      left: subX,
+      top: subY,
+      child: _buildMenuPanel(
+        items: submenuItems,
+        width: menuWidth,
+        onHoverItem: (_, __, ___) {},
+      ),
+    );
+  }
+
+  Widget _buildMenuPanel({
+    required List<DeskContextMenuItem> items,
+    required double width,
+    required void Function(DeskContextMenuItem item, int index, Rect rect) onHoverItem,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF1E293B).withValues(alpha: .85)
+            : Colors.white.withValues(alpha: .85),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: .1)
+              : Colors.grey.withValues(alpha: .2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .15),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+
+              if (item.type == DeskContextMenuType.divider) {
+                return Divider(
+                  height: 8,
+                  thickness: 1,
+                  color: isDark ? const Color(0xFF334155) : Colors.grey[200],
+                );
+              }
+
+              return MouseRegion(
+                onEnter: (_) {
+                  onHoverItem(item, index, Rect.fromLTWH(0, index * 38.0, width, 38.0));
+                },
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: item.enabled
+                        ? () async {
+                            if (widget.simulatedLagMs > 0.0) {
+                              await Future.delayed(Duration(milliseconds: widget.simulatedLagMs.toInt()));
+                            }
+                            widget.onDismiss();
+                            if (item.onTap != null) {
+                              item.onTap!();
+                            }
+                          }
+                        : null,
+                    hoverColor: theme.colorScheme.primary.withValues(alpha: .1),
+                    child: Opacity(
+                      opacity: item.enabled ? 1.0 : 0.4,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 9,
+                        ),
+                        child: Row(
+                          children: [
+                            if (item.type == DeskContextMenuType.checkbox) ...[
+                              Icon(
+                                item.isChecked == true
+                                    ? Icons.check_box_rounded
+                                    : Icons.check_box_outline_blank_rounded,
+                                size: 16,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                            ] else if (item.icon != null) ...[
+                              Icon(
+                                item.icon,
+                                size: 16,
+                                color: isDark ? Colors.grey[300] : Colors.grey[700],
+                              ),
+                              const SizedBox(width: 12),
+                            ] else ...[
+                              const SizedBox(width: 0),
+                            ],
+                            Expanded(
+                              child: Text(
+                                item.label,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                            if (item.type == DeskContextMenuType.submenu)
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: isDark ? Colors.grey[500] : Colors.grey[400],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
